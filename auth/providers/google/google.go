@@ -16,7 +16,7 @@ const (
 
 	googleIssuerUrl = "https://accounts.google.com"
 	// https://developers.google.com/identity/protocols/OAuth2InstalledApp
-	GoogleOauth2ClientID     = "37154062056-220683ek37naab43v23vc5qg01k1j14g.apps.googleusercontent.com"
+	GoogleOauth2ClientID     = "657814332113-vgpkgrum6nf1o44f5d3beh2se6ktv1kj.apps.googleusercontent.com"
 	GoogleOauth2ClientSecret = "pB9ITCuMPLj-bkObrTqKbt57"
 )
 
