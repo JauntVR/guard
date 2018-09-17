@@ -29,7 +29,7 @@ func NewOptions() Options {
 	return Options{
 		// https://developers.google.com/identity/protocols/OAuth2InstalledApp
 		ClientID: os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET")
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 	}
 }
 
