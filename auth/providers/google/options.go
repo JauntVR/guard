@@ -28,7 +28,7 @@ type Options struct {
 func NewOptions() Options {
 	return Options{
 		// https://developers.google.com/identity/protocols/OAuth2InstalledApp
-		ClientID: os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 	}
 }
@@ -122,7 +122,7 @@ func (o Options) Apply(d *v1beta1.Deployment) (extraObjs []runtime.Object, err e
 		ValueFrom: &core.EnvVarSource{
 			SecretKeyRef: &core.SecretKeySelector{
 				LocalObjectReference: core.LocalObjectReference{
-					Name: "google-oidc-credentials";
+					Name: "google-oidc-credentials",
 				},
 				Key: "client-secret",
 			},
