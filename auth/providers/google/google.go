@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/appscode/guard/auth"
-	"github.com/coreos/go-oidc"
 	"github.com/pkg/errors"
 	gdir "google.golang.org/api/admin/directory/v1"
 	gauth "google.golang.org/api/oauth2/v1"
@@ -15,9 +14,6 @@ const (
 	OrgType = "google"
 
 	googleIssuerUrl = "https://accounts.google.com"
-	// https://developers.google.com/identity/protocols/OAuth2InstalledApp
-	GoogleOauth2ClientID     = "37154062056-220683ek37naab43v23vc5qg01k1j14g.apps.googleusercontent.com"
-	GoogleOauth2ClientSecret = "pB9ITCuMPLj-bkObrTqKbt57"
 )
 
 func init() {
@@ -50,7 +46,7 @@ func New(opts Options, domain string) (auth.Interface, error) {
 	}
 
 	g.verifier = provider.Verifier(&oidc.Config{
-		ClientID: GoogleOauth2ClientID,
+		ClientID: g.ClientID,
 	})
 
 	if opts.ServiceAccountJsonFile != "" {

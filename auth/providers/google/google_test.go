@@ -16,20 +16,19 @@ import (
 	"testing"
 
 	"github.com/appscode/pat"
-	"github.com/coreos/go-oidc"
 	"github.com/stretchr/testify/assert"
 	gdir "google.golang.org/api/admin/directory/v1"
-	"gopkg.in/square/go-jose.v2"
 	authv1 "k8s.io/api/authentication/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 const (
-	userEmail   = "nahid@domain.com"
-	adminEmail  = "admin@domain.com"
-	domain      = "domain"
-	googleToken = `{ "iss" : "%s", "email" : "%s", "aud" : "%s", "hd" : "%s"}`
-	badToken    = "bad_token"
+	userEmail            = "nahid@domain.com"
+	adminEmail           = "admin@domain.com"
+	domain               = "domain"
+	googleToken          = `{ "iss" : "%s", "email" : "%s", "aud" : "%s", "hd" : "%s"}`
+	badToken             = "bad_token"
+	googleOauth2ClientID = "37154062056-220683ek37naab43v23vc5qg01k1j14g.apps.googleusercontent.com"
 )
 
 type signingKey struct {
@@ -177,7 +176,7 @@ func googleClientSetup(serverUrl string) (*Authenticator, error) {
 	}
 
 	g.verifier = p.Verifier(&oidc.Config{
-		ClientID:        GoogleOauth2ClientID,
+		ClientID:        googleOauth2ClientID,
 		SkipExpiryCheck: true,
 	})
 
@@ -290,7 +289,7 @@ func TestCheckGoogleAuthenticationSuccess(t *testing.T) {
 				t.Fatalf("Error when creatidng google client. reason : %v", err)
 			}
 
-			token, err := signKey.sign([]byte(fmt.Sprintf(googleToken, srv.URL, userEmail, GoogleOauth2ClientID, domain)))
+			token, err := signKey.sign([]byte(fmt.Sprintf(googleToken, srv.URL, userEmail, googleOauth2ClientID, domain)))
 			if err != nil {
 				t.Fatalf("Error when signing token. reason: %v", err)
 			}
@@ -306,11 +305,11 @@ func TestCheckGoogleAuthenticationSuccess(t *testing.T) {
 
 func TestCheckGoogleAuthenticationFailed(t *testing.T) {
 	var (
-		badIssuer        = fmt.Sprintf(`{ "iss":"%s", "email":"%s", "aud":"%s", "hd":"%s"}`, "https://bad", userEmail, GoogleOauth2ClientID, domain)
-		emptyHDToken     = fmt.Sprintf(`{ "iss":"_ISSUER_", "email":"%s", "aud":"%s"}`, userEmail, GoogleOauth2ClientID)
+		badIssuer        = fmt.Sprintf(`{ "iss":"%s", "email":"%s", "aud":"%s", "hd":"%s"}`, "https://bad", userEmail, googleOauth2ClientID, domain)
+		emptyHDToken     = fmt.Sprintf(`{ "iss":"_ISSUER_", "email":"%s", "aud":"%s"}`, userEmail, googleOauth2ClientID)
 		badClientIDToken = fmt.Sprintf(`{ "iss":"_ISSUER_", "email":"%s", "aud":"bad_client_id", "hd":"%s"}`, userEmail, domain)
-		badDomainIDToken = fmt.Sprintf(`{ "iss":"_ISSUER_", "email":"%s", "aud":"%s", "hd":"bad_domain"}`, userEmail, GoogleOauth2ClientID)
-		goodIDToken      = fmt.Sprintf(`{ "iss":"_ISSUER_", "email":"%s", "aud":"%s", "hd":"%s"}`, userEmail, GoogleOauth2ClientID, domain)
+		badDomainIDToken = fmt.Sprintf(`{ "iss":"_ISSUER_", "email":"%s", "aud":"%s", "hd":"bad_domain"}`, userEmail, googleOauth2ClientID)
+		goodIDToken      = fmt.Sprintf(`{ "iss":"_ISSUER_", "email":"%s", "aud":"%s", "hd":"%s"}`, userEmail, googleOauth2ClientID, domain)
 	)
 
 	signKey, err := newRSAKey(t)

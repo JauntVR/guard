@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/appscode/guard/util/kubeconfig"
@@ -31,8 +32,8 @@ func IssueToken() error {
 	// https://developers.google.com/identity/protocols/OpenIDConnect#validatinganidtoken
 	gauthConfig = oauth2.Config{
 		Endpoint:     goauth.Endpoint,
-		ClientID:     GoogleOauth2ClientID,
-		ClientSecret: GoogleOauth2ClientSecret,
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes:       []string{"openid", "profile", "email"},
 		RedirectURL:  "http://" + listener.Addr().String(),
 	}
@@ -79,8 +80,8 @@ func addAuthInfo(idToken, refreshToken string) error {
 		AuthProvider: &clientcmdapi.AuthProviderConfig{
 			Name: "oidc",
 			Config: map[string]string{
-				"client-id":      GoogleOauth2ClientID,
-				"client-secret":  GoogleOauth2ClientSecret,
+				"client-id":      os.Getenv("GOOGLE_CLIENT_ID"),
+				"client-secret":  os.Getenv("GOOGLE_CLIENT_SECRET"),
 				"id-token":       idToken,
 				"idp-issuer-url": "https://accounts.google.com",
 				"refresh-token":  refreshToken,

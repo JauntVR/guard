@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/appscode/go/types"
 	"github.com/pkg/errors"
@@ -19,11 +20,17 @@ import (
 type Options struct {
 	ServiceAccountJsonFile string
 	AdminEmail             string
+	ClientID               string
+	ClientSecret           string
 	jwtConfig              *jwt.Config
 }
 
 func NewOptions() Options {
-	return Options{}
+	return Options{
+		// https://developers.google.com/identity/protocols/OAuth2InstalledApp
+		ClientID: os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET")
+	}
 }
 
 func (o *Options) Configure() error {
@@ -50,6 +57,8 @@ func (o *Options) Configure() error {
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&o.ServiceAccountJsonFile, "google.sa-json-file", o.ServiceAccountJsonFile, "Path to Google service account json file")
 	fs.StringVar(&o.AdminEmail, "google.admin-email", o.AdminEmail, "Email of G Suite administrator")
+	fs.StringVar(&o.ClientID, "google.client-id", o.ClientID, "OAuth2 application client ID to use")
+	fs.StringVar(&o.ClientSecret, "google.client-secret", o.ClientSecret, "OAuth2 application client secret to use")
 }
 
 func (o *Options) Validate() []error {
@@ -59,6 +68,12 @@ func (o *Options) Validate() []error {
 	}
 	if o.AdminEmail == "" {
 		errs = append(errs, errors.New("google.admin-email must be non-empty"))
+	}
+	if o.ClientSecret == "" {
+		errs = append(errs, errors.New("client secret must be non-empty"))
+	}
+	if o.ClientID == "" {
+		errs = append(errs, errors.New("client-id must be non-empty"))
 	}
 	return errs
 }
@@ -102,7 +117,22 @@ func (o Options) Apply(d *v1beta1.Deployment) (extraObjs []runtime.Object, err e
 	d.Spec.Template.Spec.Volumes = append(d.Spec.Template.Spec.Volumes, vol)
 
 	// use auth secret in container[0] args
+	container.Env = append(container.Env, core.EnvVar{
+		Name: "GOOGLE_CLIENT_SECRET",
+		ValueFrom: &core.EnvVarSource{
+			SecretKeyRef: &core.SecretKeySelector{
+				LocalObjectReference: core.LocalObjectReference{
+					Name: "google-oidc-credentials";
+				},
+				Key: "client-secret",
+			},
+		},
+	})
+
 	args := container.Args
+	if o.ClientID != "" {
+		args = append(args, fmt.Sprintf("--google.client-id=%s", o.ClientID))
+	}
 	if o.ServiceAccountJsonFile != "" {
 		args = append(args, "--google.sa-json-file=/etc/guard/auth/google/sa.json")
 	}
