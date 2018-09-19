@@ -17,4 +17,4 @@ RUN set -x \
 COPY --from=builder /go/bin/guard /usr/bin/guard
 
 USER nobody:nobody
-ENTRYPOINT ["guard"]
+ENTRYPOINT ["/usr/bin/guard"]
